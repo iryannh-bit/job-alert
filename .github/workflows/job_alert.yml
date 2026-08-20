@@ -11,7 +11,7 @@ permissions:
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 8         # Sécurité : arrête si ça dépasse 8 min
+    timeout-minutes: 20        # Sécurité : arrête si ça dépasse 20 min
 
     steps:
       # 1. Checkout du repo
