@@ -1,0 +1,49 @@
+name: 📋 Summary bi-journalier — 20h
+
+on:
+  schedule:
+    - cron: '0 20 */2 * *'    # Tous les 2 jours à 20h UTC (22h Paris en été)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Send summary
+        env:
+          ANTHROPIC_API_KEY:      ${{ secrets.ANTHROPIC_API_KEY }}
+          SMTP_EMAIL:             ${{ secrets.SMTP_EMAIL }}
+          SMTP_PASSWORD:          ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_POUR_PLUS_TARD:   ${{ secrets.EMAIL_POUR_PLUS_TARD }}
+          EMAIL_RECHERCHE:        ${{ secrets.EMAIL_RECHERCHE }}
+          GOOGLE_DRIVE_FILE_ID:   ${{ secrets.GOOGLE_DRIVE_FILE_ID }}
+          SEND_SUMMARY:           "true"    # ← Active le summary
+          COVER_LETTER_ENABLED:   "false"
+        run: python main.py
+
+      - name: Commit seen jobs
+        run: |
+          git config user.name  "Job Alert Bot"
+          git config user.email "actions@github.com"
+          git add data/seen_jobs.json
+          git diff --staged --quiet || git commit -m "chore: update seen_jobs after summary [skip ci]"
+          git push

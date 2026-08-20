@@ -1,0 +1,54 @@
+name: 🔍 Job Alert — Scan toutes les 10 min
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # Toutes les 10 minutes
+  workflow_dispatch:           # Déclenchement manuel depuis GitHub
+
+permissions:
+  contents: write              # Nécessaire pour committer seen_jobs.json
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8         # Sécurité : arrête si ça dépasse 8 min
+
+    steps:
+      # 1. Checkout du repo
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 2. Python 3.11
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # 3. Dépendances
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # 4. Run du script principal
+      - name: Run job alert
+        env:
+          ANTHROPIC_API_KEY:      ${{ secrets.ANTHROPIC_API_KEY }}
+          SMTP_EMAIL:             ${{ secrets.SMTP_EMAIL }}
+          SMTP_PASSWORD:          ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_POUR_PLUS_TARD:   ${{ secrets.EMAIL_POUR_PLUS_TARD }}
+          EMAIL_RECHERCHE:        ${{ secrets.EMAIL_RECHERCHE }}
+          GOOGLE_DRIVE_FILE_ID:   ${{ secrets.GOOGLE_DRIVE_FILE_ID }}
+          SEND_SUMMARY:           "false"
+          COVER_LETTER_ENABLED:   "false"
+        run: python main.py
+
+      # 5. Commit de la base seen_jobs.json mise à jour
+      - name: Commit seen jobs database
+        run: |
+          git config user.name  "Job Alert Bot"
+          git config user.email "actions@github.com"
+          git add data/seen_jobs.json
+          git diff --staged --quiet || git commit -m "chore: update seen_jobs [skip ci]"
+          git push
