@@ -33,22 +33,31 @@ class SeenJobs:
     def is_seen(self, job_id: str) -> bool:
         return str(job_id) in self._data
 
-    def mark_seen(self, job_id: str, job: dict, alert_type: str):
+    def mark_seen(self, job_id: str, job: dict, alert_type: str, validated: bool = False):
         self._data[str(job_id)] = {
-            "title":    job.get("title", ""),
-            "company":  job.get("company", ""),
-            "url":      job.get("url", ""),
-            "source":   job.get("source", ""),
-            "type":     alert_type,
-            "seen_at":  datetime.now(timezone.utc).isoformat(),
+            "title":     job.get("title", ""),
+            "company":   job.get("company", ""),
+            "location":  job.get("location", ""),
+            "url":       job.get("url", ""),
+            "source":    job.get("source", ""),
+            "type":      alert_type,
+            "validated": validated,
+            "seen_at":   datetime.now(timezone.utc).isoformat(),
         }
 
-    def get_recent(self, alert_type: str, hours: int = 48) -> list[dict]:
-        """Retourne les offres vues dans les dernières `hours` heures."""
+    def mark_validated(self, job_id: str):
+        """Marque une offre comme validée par le filtre IA."""
+        if str(job_id) in self._data:
+            self._data[str(job_id)]["validated"] = True
+
+    def get_recent(self, alert_type: str, hours: int = 24, validated_only: bool = True) -> list[dict]:
+        """Retourne les offres récentes — par défaut uniquement celles validées par le filtre IA."""
         cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
         result = []
         for job_id, meta in self._data.items():
             if meta.get("type") != alert_type:
+                continue
+            if validated_only and not meta.get("validated", False):
                 continue
             try:
                 seen_at = datetime.fromisoformat(meta["seen_at"])

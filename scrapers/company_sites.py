@@ -133,10 +133,27 @@ def _generic_scrape(url: str, selectors: list[str], company_name: str, source_la
                 href  = link_el.get("href", "") if link_el else ""
                 desc  = desc_el.get_text(strip=True)[:600] if desc_el else ""
 
-                if not title or len(title) < 5:
+                if not title or len(title) < 8:
                     continue
-                # Ignore les entrées qui semblent être du menu / navigation
-                if any(x in title.lower() for x in ["accueil", "menu", "contact", "home", "back"]):
+                # Ignore les entrées non-pertinentes
+                NOISE_WORDS = [
+                    "accueil", "menu", "contact", "home", "back", "legal", "privacy",
+                    "cookie", "terms", "politique", "mentions légales", "confidentialité",
+                    "copyright", "sitemap", "newsletter", "linkedin", "twitter", "facebook",
+                    "instagram", "youtube", "commitment", "cluster", "property", "energy",
+                    "digibank", "fintech", "propert", "services", "group", "about",
+                    "découvrir", "nos valeurs", "notre histoire", "press", "media",
+                ]
+                if any(x in title.lower() for x in NOISE_WORDS):
+                    continue
+                # Rejeter les numéros de téléphone, emails, et titres trop longs (nav)
+                import re
+                if re.match(r'^\+?\d[\d\s\-\.]{6,}$', title):
+                    continue
+                if "@" in title or "http" in title:
+                    continue
+                if len(title) > 120:
+                    continue
                     continue
 
                 # Construction URL absolue

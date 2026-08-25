@@ -18,16 +18,21 @@ import anthropic
 logger = logging.getLogger("ai_filter")
 
 GLOBAL_CONSTRAINTS = """
-Contraintes géographiques et légales (OBLIGATOIRES, non négociables) :
-- Exclure tout poste en Europe de l'Est, au Luxembourg ou en Belgique.
-- Si le poste est en France, n'accepter que l'Île-de-France (Paris inclus).
-- Si le poste est en Afrique, n'accepter que si l'entreprise est une banque ou
-  institution financière de renommée internationale (ex: Société Générale, AXA, BNP).
-- Exclure tout poste dans un pays où un travailleur français aurait besoin que
-  l'entreprise sponsorise son visa (ex: USA, Royaume-Uni post-Brexit pour certains).
-  Si le candidat peut faire la démarche de visa seul, c'est acceptable.
-- Exclure tout poste qui mentionne une langue autre que le français ou l'anglais
-  comme atout ou requis (ex: "le danois est un plus" → exclure).
+Contraintes OBLIGATOIRES (non négociables) — rejeter si l'une n'est pas respectée :
+
+1. TYPE DE CONTRAT : Stage uniquement (internship/stage). Rejeter tout CDI, CDD, alternance, VIE, freelance.
+   Si le type de contrat est inconnu mais que le titre ou la description ne mentionne pas "stage" ou "intern", rejeter.
+
+2. GÉOGRAPHIE :
+   - Si le poste est en France : Île-de-France UNIQUEMENT (Paris, 92, 93, 94, 78, 91, 95, 77). Rejeter Rennes, Lyon, Bordeaux, Marseille, etc.
+   - Si la localisation est inconnue ou vide ET que l'entreprise est française, supposer Paris/IDF → accepter.
+   - Si le poste est en Afrique : n'accepter que si l'entreprise est une institution financière de renommée internationale.
+   - Rejeter tout poste en Europe de l'Est, Luxembourg, Belgique.
+   - Rejeter tout poste nécessitant un visa sponsorisé par l'entreprise.
+
+3. LANGUE : Rejeter si une langue autre que français ou anglais est mentionnée comme requise ou "un plus".
+
+4. CONTENU VALIDE : Rejeter si l'offre ressemble à une page de navigation, mentions légales, politique de confidentialité, numéro de téléphone, adresse email, ou tout autre contenu non-pertinent. Le titre doit ressembler à un vrai intitulé de poste.
 
 Format de réponse : JSON uniquement, sans texte avant/après.
 {"matches": true/false, "reason": "explication courte en français"}
@@ -114,8 +119,12 @@ CRITÈRES POUR CETTE ENTREPRISE :
 - Poste recherché : {entry['position']}
 - Infos complémentaires : {entry['info']}
 - Date de début souhaitée : {entry['date_range']}
-Note : si l'intitulé exact n'est pas le même mais que la description
-et les responsabilités correspondent, accepter quand même.
+
+RÈGLES POUR LES ENTREPRISES CIBLÉES (plus souples que la recherche générale) :
+- Accepter si l'offre est dans le domaine finance/M&A/conseil/investissement même si l'intitulé exact diffère.
+- Accepter si la description correspond à l'esprit du poste recherché, même si quelques mots-clés manquent.
+- En cas de doute raisonnable, préférer accepter plutôt que rejeter (le candidat préfère voir l'offre).
+- Rejeter seulement si c'est clairement hors sujet (ex: poste RH, IT pur, commercial terrain) ou hors contraintes géo/contrat.
 
 {GLOBAL_CONSTRAINTS}
 """

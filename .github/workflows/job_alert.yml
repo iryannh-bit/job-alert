@@ -1,8 +1,8 @@
-name: 🔍 Job Alert — Scan toutes les 10 min
+name: 🔍 Job Alert — Scan toutes les 30 min
 
 on:
   schedule:
-    - cron: '*/10 * * * *'   # Toutes les 10 minutes
+    - cron: '*/30 * * * *'   # Toutes les 30 minutes
   workflow_dispatch:           # Déclenchement manuel depuis GitHub
 
 permissions:

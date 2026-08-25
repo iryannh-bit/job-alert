@@ -12,6 +12,7 @@ from config_loader import load_config
 from scrapers.wttj import WTTJScraper
 from scrapers.efinancial import EFinancialScraper
 from scrapers.dogfinance import DogfinanceScraper
+from scrapers.makesense import MakeSenseScraper
 from scrapers.company_sites import CompanyScraper
 from filters.ai_filter import AIFilter
 from notifier.email_sender import EmailSender
@@ -53,6 +54,7 @@ def main():
         WTTJScraper(),
         EFinancialScraper(),
         DogfinanceScraper(),
+        MakeSenseScraper(),
     ]
 
     # JobTeaser désactivé — peut être réactivé plus tard
@@ -64,12 +66,13 @@ def main():
             jobs = scraper.search_recherche(config["recherche"])
             for job in jobs:
                 if not seen.is_seen(job["id"]):
-                    seen.mark_seen(job["id"], job, "recherche")
+                    seen.mark_seen(job["id"], job, "recherche", validated=False)
                     if ai_filter.validate_recherche(job, config["recherche"]):
+                        seen.mark_validated(job["id"])
                         new_rech.append(job)
                         logger.info(f"  ✅ [RECH] {job['title']} @ {job['company']} ({scraper.name})")
                     else:
-                        logger.debug(f"  ✗ Filtré : {job['title']} @ {job['company']}")
+                        logger.info(f"  ✗ Filtré : {job['title']} @ {job['company']}")
         except Exception as e:
             logger.error(f"Erreur scraper {scraper.name} (recherche) : {e}", exc_info=True)
 
@@ -80,12 +83,13 @@ def main():
             jobs = scraper.search_pour_plus_tard(config["pour_plus_tard"])
             for job in jobs:
                 if not seen.is_seen(job["id"]):
-                    seen.mark_seen(job["id"], job, "pour_plus_tard")
+                    seen.mark_seen(job["id"], job, "pour_plus_tard", validated=False)
                     if ai_filter.validate_pour_plus_tard(job, config["pour_plus_tard"]):
+                        seen.mark_validated(job["id"])
                         new_ppt.append(job)
                         logger.info(f"  ✅ [PPT] {job['title']} @ {job['company']} ({scraper.name})")
                     else:
-                        logger.debug(f"  ✗ Filtré : {job['title']} @ {job['company']}")
+                        logger.info(f"  ✗ Filtré : {job['title']} @ {job['company']}")
         except Exception as e:
             logger.error(f"Erreur scraper {scraper.name} (PPT) : {e}", exc_info=True)
 
@@ -98,35 +102,32 @@ def main():
             jobs = company_scraper.scrape(entry)
             for job in jobs:
                 if not seen.is_seen(job["id"]):
-                    seen.mark_seen(job["id"], job, "pour_plus_tard")
+                    seen.mark_seen(job["id"], job, "pour_plus_tard", validated=False)
                     if ai_filter.validate_pour_plus_tard(job, config["pour_plus_tard"]):
+                        seen.mark_validated(job["id"])
                         new_ppt.append(job)
                         logger.info(f"  ✅ [PPT] {job['title']} @ {company} (site carrière)")
                     else:
-                        logger.debug(f"  ✗ Filtré : {job['title']} @ {company}")
+                        logger.info(f"  ✗ Filtré : {job['title']} @ {company}")
         except Exception as e:
             logger.error(f"Erreur site carrière {company} : {e}", exc_info=True)
 
-    # ── Envoi des alertes instantanées ────────────────────────
-    logger.info(f"── Envoi alertes : {len(new_ppt)} PPT, {len(new_rech)} Recherche ──")
-
+    # ── Envoi des alertes instantanées (PPT uniquement) ──────
+    logger.info(f"── Envoi alertes instantanées : {len(new_ppt)} PPT ──")
     for job in new_ppt:
         try:
             mailer.send_alert(to=EMAIL_PPT, job=job, alert_type="pour_plus_tard")
         except Exception as e:
             logger.error(f"Échec envoi mail PPT pour {job['title']} : {e}")
 
-    for job in new_rech:
-        try:
-            mailer.send_alert(to=EMAIL_RECH, job=job, alert_type="recherche")
-        except Exception as e:
-            logger.error(f"Échec envoi mail Recherche pour {job['title']} : {e}")
+    # Recherche → pas d'email instantané, seulement dans le récap quotidien
+    logger.info(f"── {len(new_rech)} offres Recherche ajoutées au récap quotidien ──")
 
-    # ── Summary bi-journalier (déclenché par workflow dédié) ──
+    # ── Summary quotidien (déclenché par workflow dédié) ──────
     if SEND_SUMMARY:
-        logger.info("── Envoi du summary bi-journalier ──")
-        recent_ppt  = seen.get_recent("pour_plus_tard",  hours=48)
-        recent_rech = seen.get_recent("recherche",       hours=48)
+        logger.info("── Envoi du récap quotidien ──")
+        recent_ppt  = seen.get_recent("pour_plus_tard",  hours=24)
+        recent_rech = seen.get_recent("recherche",       hours=24)
         if recent_ppt:
             mailer.send_summary(to=EMAIL_PPT,  jobs=recent_ppt,  alert_type="pour_plus_tard")
         if recent_rech:

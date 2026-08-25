@@ -76,42 +76,32 @@ class EmailSender:
     # Helpers
     # ──────────────────────────────────────────────────────────
     def _build_alert_html(self, job: dict, label: str) -> str:
-        cover_note = ""
-        if job.get("cover_letter_path"):
-            cover_note = "<p>✉️ <strong>Lettre de motivation générée en pièce jointe.</strong></p>"
+        location = job.get('location', '') or 'Non précisée'
+        url = job.get('url', '#') or '#'
+        description = job.get('description', '') or ''
+        desc_text = description[:500] + '…' if len(description) > 500 else description
 
         return f"""
-<html><body style="font-family:Arial,sans-serif;color:#222;max-width:680px;margin:auto;">
+<html><body style="font-family:Arial,sans-serif;color:#222;max-width:640px;margin:auto;">
   <div style="background:#1a1a2e;padding:20px;border-radius:8px 8px 0 0;">
     <h2 style="color:#e0e0ff;margin:0;">💼 Nouvelle offre — {label}</h2>
   </div>
   <div style="border:1px solid #ddd;border-top:none;padding:24px;border-radius:0 0 8px 8px;">
     <h3 style="margin-top:0;color:#1a1a2e;">{job.get('title','N/A')}</h3>
-    <table style="width:100%;border-collapse:collapse;">
-      <tr><td style="padding:6px 0;color:#666;width:140px;">🏢 Entreprise</td>
-          <td><strong>{job.get('company','N/A')}</strong></td></tr>
-      <tr><td style="padding:6px 0;color:#666;">📍 Localisation</td>
-          <td>{job.get('location','N/A')}</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">📄 Contrat</td>
-          <td>{job.get('contract_type','Stage')}</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">📅 Date</td>
-          <td>{job.get('date_range','N/A')}</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">🔗 Source</td>
-          <td>{job.get('source','N/A')}</td></tr>
-    </table>
-    <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
-    <h4 style="color:#444;">Description</h4>
-    <p style="color:#555;line-height:1.6;">{job.get('description','N/A')[:600]}…</p>
-    {cover_note}
+    <p style="margin:4px 0;font-size:15px;">🏢 <strong>{job.get('company','N/A')}</strong></p>
+    <p style="margin:4px 0;font-size:14px;color:#555;">📍 {location}</p>
+    <p style="margin:4px 0;font-size:14px;color:#555;">📄 {job.get('contract_type','Stage')}</p>
+    <hr style="margin:16px 0;border:none;border-top:1px solid #eee;">
+    <p style="color:#555;line-height:1.6;font-size:14px;">{desc_text}</p>
     <div style="text-align:center;margin-top:24px;">
-      <a href="{job.get('url','#')}"
+      <a href="{url}"
          style="background:#1a1a2e;color:#fff;padding:12px 32px;
-                text-decoration:none;border-radius:6px;font-weight:bold;">
-        Voir l'offre complète →
+                text-decoration:none;border-radius:6px;font-weight:bold;font-size:15px;">
+        Voir l'offre →
       </a>
     </div>
-    <p style="font-size:11px;color:#aaa;margin-top:32px;text-align:center;">
-      Alerte générée automatiquement • Pour modifier les préférences : mettez à jour l'Excel
+    <p style="font-size:11px;color:#aaa;margin-top:24px;text-align:center;">
+      Alerte automatique Job Alert
     </p>
   </div>
 </body></html>"""
@@ -119,39 +109,41 @@ class EmailSender:
     def _build_summary_html(self, jobs: list[dict], label: str) -> str:
         rows = ""
         for j in jobs:
+            location = j.get('location', '') or '—'
+            url = j.get('url', '#') or '#'
             rows += f"""
         <tr>
-          <td style="padding:10px 8px;border-bottom:1px solid #eee;">
-            <strong>{j.get('title','N/A')}</strong><br>
-            <span style="color:#666;font-size:13px;">{j.get('company','')} — {j.get('location','')}</span>
+          <td style="padding:12px 8px;border-bottom:1px solid #eee;vertical-align:top;">
+            <strong style="font-size:14px;">{j.get('title','N/A')}</strong><br>
+            <span style="color:#555;font-size:13px;">🏢 {j.get('company','')}</span><br>
+            <span style="color:#888;font-size:12px;">📍 {location}</span>
           </td>
-          <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#888;font-size:12px;">
-            {j.get('source','')}
-          </td>
-          <td style="padding:10px 8px;border-bottom:1px solid #eee;">
-            <a href="{j.get('url','#')}" style="color:#1a1a2e;font-weight:bold;">Voir →</a>
+          <td style="padding:12px 8px;border-bottom:1px solid #eee;vertical-align:middle;text-align:center;white-space:nowrap;">
+            <a href="{url}" style="background:#1a1a2e;color:#fff;padding:8px 16px;
+               text-decoration:none;border-radius:4px;font-size:13px;font-weight:bold;">
+              Voir →
+            </a>
           </td>
         </tr>"""
 
         return f"""
 <html><body style="font-family:Arial,sans-serif;color:#222;max-width:700px;margin:auto;">
   <div style="background:#1a1a2e;padding:20px;border-radius:8px 8px 0 0;">
-    <h2 style="color:#e0e0ff;margin:0;">📋 Récap 48h — {label}</h2>
+    <h2 style="color:#e0e0ff;margin:0;">📋 Récap 24h — {label}</h2>
     <p style="color:#aaa;margin:4px 0 0;">{len(jobs)} offre(s) trouvée(s)</p>
   </div>
   <div style="border:1px solid #ddd;border-top:none;padding:24px;border-radius:0 0 8px 8px;">
     <table style="width:100%;border-collapse:collapse;">
       <thead>
         <tr style="background:#f5f5f5;">
-          <th style="padding:10px 8px;text-align:left;">Poste</th>
-          <th style="padding:10px 8px;text-align:left;">Source</th>
-          <th style="padding:10px 8px;text-align:left;">Lien</th>
+          <th style="padding:10px 8px;text-align:left;font-size:13px;">Poste</th>
+          <th style="padding:10px 8px;text-align:center;font-size:13px;">Lien</th>
         </tr>
       </thead>
       <tbody>{rows}</tbody>
     </table>
-    <p style="font-size:11px;color:#aaa;margin-top:32px;text-align:center;">
-      Summary automatique • Envoyé tous les 2 jours à 20h
+    <p style="font-size:11px;color:#aaa;margin-top:24px;text-align:center;">
+      Récap quotidien Job Alert • Envoyé tous les jours à 20h
     </p>
   </div>
 </body></html>"""
