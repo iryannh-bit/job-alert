@@ -35,7 +35,7 @@ Contraintes OBLIGATOIRES (non négociables) — rejeter si l'une n'est pas respe
 4. CONTENU VALIDE : Rejeter si l'offre ressemble à une page de navigation, mentions légales, politique de confidentialité, numéro de téléphone, adresse email, ou tout autre contenu non-pertinent. Le titre doit ressembler à un vrai intitulé de poste.
 
 Format de réponse : JSON uniquement, sans texte avant/après.
-{"matches": true/false, "reason": "explication courte en français"}
+{"matches": true/false, "reason": "explication courte en français", "summary": "1-2 phrases résumant l'offre si matches=true (titre du poste, entreprise, domaine, durée si mentionnée), sinon chaîne vide"}
 """
 
 
@@ -44,13 +44,12 @@ class AIFilter:
         self.client = anthropic.Anthropic(api_key=api_key)
         self._cache: dict[str, bool] = {}
 
-    def validate_recherche(self, job: dict, recherche_config: list[dict]) -> bool:
-        """Valide une offre pour le flux 'Recherche entreprise'."""
+    def validate_recherche(self, job: dict, recherche_config: list[dict]) -> tuple[bool, str]:
+        """Valide une offre pour le flux 'Recherche entreprise'. Retourne (matches, summary)."""
         cache_key = job["id"]
         if cache_key in self._cache:
             return self._cache[cache_key]
 
-        # Trouve la config qui correspond au mieux au type de poste
         matching_configs = [
             c for c in recherche_config
             if c["job_type"].lower() in job.get("title", "").lower()
@@ -58,7 +57,6 @@ class AIFilter:
         ]
         extra_criteria = matching_configs[0]["info"] if matching_configs else ""
         date_range     = matching_configs[0]["date_range"] if matching_configs else ""
-        location_rules = matching_configs[0]["location"] if matching_configs else ""
 
         prompt = f"""
 Tu es un assistant qui aide un étudiant de l'ESSEC à trouver un stage.
@@ -85,22 +83,20 @@ CRITÈRES SPÉCIFIQUES :
         self._cache[cache_key] = result
         return result
 
-    def validate_pour_plus_tard(self, job: dict, ppt_config: list[dict]) -> bool:
-        """Valide une offre pour le flux 'Pour plus tard' (entreprises ciblées)."""
+    def validate_pour_plus_tard(self, job: dict, ppt_config: list[dict]) -> tuple[bool, str]:
+        """Valide une offre pour le flux 'Pour plus tard'. Retourne (matches, summary)."""
         cache_key = job["id"]
         if cache_key in self._cache:
             return self._cache[cache_key]
 
-        # Trouve l'entrée PPT correspondant à cette entreprise
         company = job.get("company", "").lower()
         matching = [
             c for c in ppt_config
             if c["company"].lower() in company or company in c["company"].lower()
         ]
         if not matching:
-            # Entreprise inconnue dans la liste PPT — on rejette
-            self._cache[cache_key] = False
-            return False
+            self._cache[cache_key] = (False, "")
+            return (False, "")
 
         entry = matching[0]
         prompt = f"""
@@ -123,8 +119,9 @@ CRITÈRES POUR CETTE ENTREPRISE :
 RÈGLES POUR LES ENTREPRISES CIBLÉES (plus souples que la recherche générale) :
 - Accepter si l'offre est dans le domaine finance/M&A/conseil/investissement même si l'intitulé exact diffère.
 - Accepter si la description correspond à l'esprit du poste recherché, même si quelques mots-clés manquent.
-- En cas de doute raisonnable, préférer accepter plutôt que rejeter (le candidat préfère voir l'offre).
-- Rejeter seulement si c'est clairement hors sujet (ex: poste RH, IT pur, commercial terrain) ou hors contraintes géo/contrat.
+- En cas de doute raisonnable sur le DOMAINE, préférer accepter plutôt que rejeter.
+- Rejeter seulement si c'est clairement hors sujet (ex: poste RH, IT pur, commercial terrain).
+- ATTENTION : la leniency s'applique uniquement au domaine/contenu. Les contraintes obligatoires (type de contrat, géographie, contenu valide) restent ABSOLUES même pour les entreprises ciblées. Un CDI ou une page non-pertinente est toujours rejeté.
 
 {GLOBAL_CONSTRAINTS}
 """
@@ -132,24 +129,24 @@ RÈGLES POUR LES ENTREPRISES CIBLÉES (plus souples que la recherche générale)
         self._cache[cache_key] = result
         return result
 
-    def _call_claude(self, prompt: str) -> bool:
-        """Appelle l'API Claude et retourne True si l'offre correspond."""
+    def _call_claude(self, prompt: str) -> tuple[bool, str]:
+        """Appelle Claude et retourne (matches, summary)."""
         for attempt in range(3):
             try:
                 response = self.client.messages.create(
                     model="claude-sonnet-4-6",
-                    max_tokens=200,
+                    max_tokens=300,
                     messages=[{"role": "user", "content": prompt}]
                 )
                 text = response.content[0].text.strip()
-                # Nettoie les éventuels backticks
                 text = text.replace("```json", "").replace("```", "").strip()
-                parsed = json.loads(text)
+                parsed  = json.loads(text)
                 matches = parsed.get("matches", False)
                 reason  = parsed.get("reason", "")
+                summary = parsed.get("summary", "") if matches else ""
                 if not matches:
                     logger.debug(f"  Rejeté par Claude : {reason}")
-                return bool(matches)
+                return (bool(matches), summary)
             except json.JSONDecodeError as e:
                 logger.warning(f"Réponse Claude non-JSON (tentative {attempt+1}) : {e}")
             except anthropic.RateLimitError:
@@ -158,4 +155,4 @@ RÈGLES POUR LES ENTREPRISES CIBLÉES (plus souples que la recherche générale)
             except Exception as e:
                 logger.error(f"Erreur appel Claude : {e}")
                 time.sleep(5)
-        return False
+        return (False, "")

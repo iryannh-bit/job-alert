@@ -78,8 +78,14 @@ class EmailSender:
     def _build_alert_html(self, job: dict, label: str) -> str:
         location = job.get('location', '') or 'Non précisée'
         url = job.get('url', '#') or '#'
+        summary = job.get('summary', '') or ''
         description = job.get('description', '') or ''
         desc_text = description[:500] + '…' if len(description) > 500 else description
+
+        summary_block = f"""
+    <div style="background:#f0f4ff;border-left:4px solid #1a1a2e;padding:12px 16px;margin:16px 0;border-radius:0 6px 6px 0;">
+      <p style="margin:0;color:#1a1a2e;font-size:14px;font-style:italic;">{summary}</p>
+    </div>""" if summary else ""
 
         return f"""
 <html><body style="font-family:Arial,sans-serif;color:#222;max-width:640px;margin:auto;">
@@ -91,6 +97,7 @@ class EmailSender:
     <p style="margin:4px 0;font-size:15px;">🏢 <strong>{job.get('company','N/A')}</strong></p>
     <p style="margin:4px 0;font-size:14px;color:#555;">📍 {location}</p>
     <p style="margin:4px 0;font-size:14px;color:#555;">📄 {job.get('contract_type','Stage')}</p>
+    {summary_block}
     <hr style="margin:16px 0;border:none;border-top:1px solid #eee;">
     <p style="color:#555;line-height:1.6;font-size:14px;">{desc_text}</p>
     <div style="text-align:center;margin-top:24px;">
@@ -111,12 +118,15 @@ class EmailSender:
         for j in jobs:
             location = j.get('location', '') or '—'
             url = j.get('url', '#') or '#'
+            summary = j.get('summary', '') or ''
+            summary_line = f'<br><span style="color:#1a1a2e;font-size:12px;font-style:italic;">{summary}</span>' if summary else ''
             rows += f"""
         <tr>
           <td style="padding:12px 8px;border-bottom:1px solid #eee;vertical-align:top;">
             <strong style="font-size:14px;">{j.get('title','N/A')}</strong><br>
             <span style="color:#555;font-size:13px;">🏢 {j.get('company','')}</span><br>
             <span style="color:#888;font-size:12px;">📍 {location}</span>
+            {summary_line}
           </td>
           <td style="padding:12px 8px;border-bottom:1px solid #eee;vertical-align:middle;text-align:center;white-space:nowrap;">
             <a href="{url}" style="background:#1a1a2e;color:#fff;padding:8px 16px;
@@ -143,7 +153,7 @@ class EmailSender:
       <tbody>{rows}</tbody>
     </table>
     <p style="font-size:11px;color:#aaa;margin-top:24px;text-align:center;">
-      Récap quotidien Job Alert • Envoyé tous les jours à 20h
+      Récap quotidien Job Alert • Envoyé tous les jours à 18h
     </p>
   </div>
 </body></html>"""

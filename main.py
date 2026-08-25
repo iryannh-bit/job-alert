@@ -67,7 +67,9 @@ def main():
             for job in jobs:
                 if not seen.is_seen(job["id"]):
                     seen.mark_seen(job["id"], job, "recherche", validated=False)
-                    if ai_filter.validate_recherche(job, config["recherche"]):
+                    matches, summary = ai_filter.validate_recherche(job, config["recherche"])
+                    if matches:
+                        job["summary"] = summary
                         seen.mark_validated(job["id"])
                         new_rech.append(job)
                         logger.info(f"  ✅ [RECH] {job['title']} @ {job['company']} ({scraper.name})")
@@ -84,7 +86,9 @@ def main():
             for job in jobs:
                 if not seen.is_seen(job["id"]):
                     seen.mark_seen(job["id"], job, "pour_plus_tard", validated=False)
-                    if ai_filter.validate_pour_plus_tard(job, config["pour_plus_tard"]):
+                    matches, summary = ai_filter.validate_pour_plus_tard(job, config["pour_plus_tard"])
+                    if matches:
+                        job["summary"] = summary
                         seen.mark_validated(job["id"])
                         new_ppt.append(job)
                         logger.info(f"  ✅ [PPT] {job['title']} @ {job['company']} ({scraper.name})")
@@ -103,7 +107,9 @@ def main():
             for job in jobs:
                 if not seen.is_seen(job["id"]):
                     seen.mark_seen(job["id"], job, "pour_plus_tard", validated=False)
-                    if ai_filter.validate_pour_plus_tard(job, config["pour_plus_tard"]):
+                    matches, summary = ai_filter.validate_pour_plus_tard(job, config["pour_plus_tard"])
+                    if matches:
+                        job["summary"] = summary
                         seen.mark_validated(job["id"])
                         new_ppt.append(job)
                         logger.info(f"  ✅ [PPT] {job['title']} @ {company} (site carrière)")

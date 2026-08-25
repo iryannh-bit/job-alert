@@ -2,7 +2,7 @@ name: 📋 Summary quotidien — 20h
 
 on:
   schedule:
-    - cron: '0 20 * * *'      # Tous les jours à 20h UTC (22h Paris en été)
+    - cron: '0 16 * * *'      # Tous les jours à 16h UTC (18h Paris en été)
   workflow_dispatch:
 
 permissions:
