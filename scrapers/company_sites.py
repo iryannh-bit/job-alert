@@ -24,85 +24,92 @@ HEADERS = {
 
 COMPANY_REGISTRY: dict[str, dict] = {
     "deloitte": {
-        "url": "https://jobs.deloitte.fr/search?q=stage+transaction+services&type=Intern",
-        "selectors": ["article.job", ".job-tile", "li.result"],
+        "url": "https://www.deloitte.com/fr/fr/careers/content/job/results.html",
+        "selectors": ["article.job", ".job-tile", "li.result", ".job-card"],
     },
     "pwc": {
-        "url": "https://jobs.pwc.fr/search-results?keywords=transaction+services+stage",
-        "selectors": [".job-tile", ".job-listing", "article"],
+        "url": "https://carrieres.pwc.fr/fr/stage-offres.html",
+        "selectors": [".job-tile", ".job-listing", "article", ".job-card"],
     },
     "kpmg": {
-        "url": "https://kpmg.com/fr/fr/careers/search-jobs.html?keyword=transaction+services+stage",
-        "selectors": [".job-card", ".job-result", "li.job"],
+        "url": "https://emplois.kpmg.fr/recherche-d%27offres?acm=ALL&alrpm=ALL&ascf=[{%22key%22:%22custom_fields.CareerLevel%22,%22value%22:%22Etudiants%22}]",
+        "selectors": [".job-card", ".job-result", "li.job", "article"],
     },
     "ey": {
-        "url": "https://careers.ey.com/ey/search/#q=transaction%20services%20stage&t=France",
-        "selectors": [".job-card", ".result-item", "article"],
+        "url": "https://eyglobal.yello.co/job_boards/c1riT--B2O-KySgYWsZO1Q",
+        "selectors": [".job-card", ".result-item", "article", "li"],
     },
     "bdo": {
-        "url": "https://www.bdo.fr/fr-fr/offres-de-missions?keyword=transaction+stage",
-        "selectors": [".job-card", ".mission-card", "article"],
+        "url": "https://recrutement.bdo.fr/",
+        "selectors": [".job-card", ".mission-card", "article", "li"],
     },
     "forvis mazars": {
-        "url": "https://www.forvismazars.com/fr/fr/careers/job-search?q=transaction+services+stage",
-        "selectors": [".job-card", ".vacancy-item", "article"],
+        "url": "https://recrutement-fr.forvismazars.com/offres-emploi?contract=stage",
+        "selectors": [".job-card", ".vacancy-item", "article", "li"],
     },
     "mazars": {
-        "url": "https://www.forvismazars.com/fr/fr/careers/job-search?q=transaction+services+stage",
-        "selectors": [".job-card", ".vacancy-item", "article"],
+        "url": "https://recrutement-fr.forvismazars.com/offres-emploi?contract=stage",
+        "selectors": [".job-card", ".vacancy-item", "article", "li"],
     },
     "accenture": {
-        "url": "https://www.accenture.com/fr-fr/careers/jobsearch?jk=stage+m%26a+tech",
-        "selectors": [".cmp-job-list-item", ".job-card", "li.job"],
+        "url": "https://www.accenture.com/fr-fr/careers/jobsearch",
+        "selectors": [".cmp-job-list-item", ".job-card", "li.job", "article"],
     },
     "natixis": {
-        "url": "https://jobs.natixis.com/search?q=stage+M%26A&type=Internship",
-        "selectors": [".job-card", ".result-row", "article"],
+        "url": "https://recrutement.natixis.com/nos-offres-demploi?external=false",
+        "selectors": [".job-card", ".result-row", "article", "li"],
     },
     "ubs": {
-        "url": "https://jobs.ubs.com/TGWebHost/searchjobs.aspx?Keywords=ESG+analyst+internship&Country=France",
-        "selectors": [".job-result", ".position-item", "tr.job"],
+        "url": "https://jobs.ubs.com/TGNewUI/Search/Home/Home?partnerid=25008&siteid=5176",
+        "selectors": [".job-result", ".position-item", "tr.job", "article"],
     },
     "orange": {
-        "url": "https://emploi.orange.fr/offres?text=M%26A+stage&type=internship",
-        "selectors": [".job-card", ".offer-item", "article"],
+        "url": "https://orange.jobs/fr/fr/search-results",
+        "selectors": [".job-card", ".offer-item", "article", "li"],
     },
     "accuracy": {
-        "url": "https://accuracy.com/fr/rejoindre-accuracy/offres-emploi/",
-        "selectors": [".job-item", ".offer", "article", "li"],
+        "url": "https://www.accuracy.com/fr/nous-rejoindre/",
+        "selectors": [".job-item", ".offer", "article", "li", "a[href*='emploi']"],
     },
     "iad": {
-        "url": "https://recrutement.iadfrance.fr/nos-offres",
+        "url": "https://www.welcometothejungle.com/fr/companies/iad/jobs",
         "selectors": [".job-card", ".offer-item", "article", "li.offer"],
     },
     "carbone4": {
-        "url": "https://www.carbone4.com/rejoindre-carbone4",
-        "selectors": [".job", ".position", "article", "li"],
+        "url": "https://carbone4.com/fr/jobs",
+        "selectors": [".job", ".position", "article", "li", "a[href*='job']"],
     },
     "eight advisory": {
-        "url": "https://www.eight-advisory.com/fr/nous-rejoindre/nos-offres",
-        "selectors": [".job-item", ".offer", "article"],
+        "url": "https://www.8advisory.com/emplois/",
+        "selectors": [".job-item", ".offer", "article", "li"],
     },
     "amethis": {
-        "url": "https://www.amethis.co/fr/join-us/",
-        "selectors": [".job", ".position", "article", "li"],
+        "url": "https://www.amethis.com/en/careers/",
+        "selectors": [".job", ".position", "article", "li", "a[href*='job']"],
     },
-    "investisseurs & partenaires": {
-        "url": "https://www.ietp.com/fr/nous-rejoindre",
-        "selectors": [".job", ".offer", "article", "li"],
+    "investisseurs & partenaires (i&p)": {
+        "url": "https://www.ietp.com/fr/content/recrutement",
+        "selectors": [".job", ".offer", "article", "li", "a[href*='emploi']"],
     },
     "i&p": {
-        "url": "https://www.ietp.com/fr/nous-rejoindre",
-        "selectors": [".job", ".offer", "article", "li"],
+        "url": "https://www.ietp.com/fr/content/recrutement",
+        "selectors": [".job", ".offer", "article", "li", "a[href*='emploi']"],
     },
     "axian": {
-        "url": "https://www.axian-group.com/en/careers/",
-        "selectors": [".job-card", ".career-item", "article", "li"],
+        "url": "https://axian-group.csod.com/ux/ats/careersite/1/home?c=axian-group",
+        "selectors": [".job-card", ".career-item", "article", "li", ".requisition"],
     },
     "iptp": {
-        # IPTP publie uniquement sur WTTJ — site carrière minimal
-        "url": "https://www.inflexionpointspartners.com/fr/join-us",
+        "url": "https://www.welcometothejungle.com/fr/companies/inflexion-points-technology/jobs",
         "selectors": [".job", ".offer", "article", "li", "a"],
+    },
+    "ecofi": {
+        "url": "https://jobs.makesense.org/fr/projects/ecofi-5588",
+        "selectors": [".job-card", ".offer", "article", "li"],
+    },
+    "bnp paribas cardif": {
+        "url": "https://www.bnpparibascardif.com/nous-rejoindre/nos-offres-demploi/?keywords=&type%5B%5D=stage",
+        "selectors": [".job-card", ".offer-item", "article", "li"],
     },
 }
 

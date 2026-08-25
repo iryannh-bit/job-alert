@@ -48,8 +48,6 @@ def _get_algolia_credentials() -> tuple[str, str]:
 
 def _algolia_search(query: str, filters: str = "", hits_per_page: int = 50) -> list[dict]:
     app_id, api_key = _get_algolia_credentials()
-    url = (f"https://{app_id.lower()}-dsn.algolia.net/1/indexes/"
-           f"{_ALGOLIA_INDEX}/query")
     headers = {
         "X-Algolia-Application-Id": app_id,
         "X-Algolia-API-Key":        api_key,
@@ -64,13 +62,20 @@ def _algolia_search(query: str, filters: str = "", hits_per_page: int = 50) -> l
             "published_at", "description", "slug", "company_slug",
         ],
     }
-    try:
-        r = requests.post(url, headers=headers, json=payload, timeout=20)
-        r.raise_for_status()
-        return r.json().get("hits", [])
-    except Exception as e:
-        logger.error(f"Algolia query échouée pour '{query}' : {e}")
-        return []
+    endpoints = [
+        f"https://{app_id.lower()}.algolia.net/1/indexes/{_ALGOLIA_INDEX}/query",
+        f"https://{app_id}-1.algolianet.com/1/indexes/{_ALGOLIA_INDEX}/query",
+        f"https://{app_id}-2.algolianet.com/1/indexes/{_ALGOLIA_INDEX}/query",
+    ]
+    for url in endpoints:
+        try:
+            r = requests.post(url, headers=headers, json=payload, timeout=20)
+            r.raise_for_status()
+            return r.json().get("hits", [])
+        except Exception as e:
+            logger.warning(f"Algolia endpoint {url} échoué : {e}")
+    logger.error(f"Algolia query échouée pour '{query}' : tous les endpoints ont échoué")
+    return []
 
 
 def _hit_to_job(hit: dict, source_label: str) -> dict:
