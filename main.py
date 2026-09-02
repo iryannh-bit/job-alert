@@ -25,7 +25,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("main")
 
-EMAIL_PPT      = os.environ.get("EMAIL_POUR_PLUS_TARD", "iryannh@gmail.com")
+EMAIL_PPT      = os.environ.get("EMAIL_POUR_PLUS_TARD", "iryannhassim@gmail.com")
 EMAIL_RECH     = os.environ.get("EMAIL_RECHERCHE",      "iryannhassim@gmail.com")
 SEND_SUMMARY   = os.environ.get("SEND_SUMMARY", "false").lower() == "true"
 
