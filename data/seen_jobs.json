@@ -7490,5 +7490,25 @@
     "type": "pour_plus_tard",
     "validated": false,
     "seen_at": "2026-09-04T21:47:51.323882+00:00"
+  },
+  "c05b5d411549ea53": {
+    "title": "Conseiller en Gestion de Patrimoine H/F",
+    "company": "",
+    "location": "",
+    "url": "https://dogfinance.com/offre/kays-wealth-management/conseiller-en-gestion-de-patrimoine-hf",
+    "source": "Dogfinance",
+    "type": "recherche",
+    "validated": true,
+    "seen_at": "2026-09-05T04:01:35.673972+00:00"
+  },
+  "8b8b7e105cd8de53": {
+    "title": "Un(e) « Conseiller (e) commercial(e) PP-RAC-PI-ADE »",
+    "company": "",
+    "location": "",
+    "url": "https://dogfinance.com/offre/groupe-csf/une-conseiller-e-commercialepp-rac-pi-ade",
+    "source": "Dogfinance",
+    "type": "recherche",
+    "validated": false,
+    "seen_at": "2026-09-05T04:01:40.761942+00:00"
   }
 }
