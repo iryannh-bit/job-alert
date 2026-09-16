@@ -10850,5 +10850,65 @@
     "type": "pour_plus_tard",
     "validated": false,
     "seen_at": "2026-09-16T11:23:33.373800+00:00"
+  },
+  "4cf5d63131b8e2ca": {
+    "title": "Un(e) « Conseiller (e) commercial(e) PP-RAC-PI-ADE »",
+    "company": "",
+    "location": "",
+    "url": "https://dogfinance.com/offre/groupe-csf/une-conseiller-e-commercialepp-rac-pi-ade6635",
+    "source": "Dogfinance",
+    "type": "recherche",
+    "validated": false,
+    "seen_at": "2026-09-16T15:31:29.958537+00:00"
+  },
+  "831a2ca7217b9ebe": {
+    "title": "Conseiller financier (PP-RAC-PI-ADE)",
+    "company": "",
+    "location": "",
+    "url": "https://dogfinance.com/offre/groupe-csf/conseiller-financier-pp-rac-pi-ade32584",
+    "source": "Dogfinance",
+    "type": "recherche",
+    "validated": false,
+    "seen_at": "2026-09-16T15:31:32.921556+00:00"
+  },
+  "c27e21c3349ae079": {
+    "title": "Junior Accounting and Business Consultant - Diegem",
+    "company": "EY",
+    "location": "",
+    "url": "https://eyglobal.yello.co/jobs/1zCqF3qeNnToYJXm8BWS5g?job_board_id=c1riT--B2O-KySgYWsZO1Q",
+    "source": "Site carrière EY",
+    "type": "pour_plus_tard",
+    "validated": false,
+    "seen_at": "2026-09-16T15:35:07.743552+00:00"
+  },
+  "d003292156492409": {
+    "title": "Junior Accounting and Business Consultant - Antwerpen",
+    "company": "EY",
+    "location": "",
+    "url": "https://eyglobal.yello.co/jobs/q1PglREhoyyflH3L7qZGgA?job_board_id=c1riT--B2O-KySgYWsZO1Q",
+    "source": "Site carrière EY",
+    "type": "pour_plus_tard",
+    "validated": false,
+    "seen_at": "2026-09-16T15:35:09.784979+00:00"
+  },
+  "35764e59f6c56822": {
+    "title": "Fenntarthatósági tanácsadó gyakornok",
+    "company": "EY",
+    "location": "",
+    "url": "https://eyglobal.yello.co/jobs/ycsA0segv2i7zIuARrXN7w?job_board_id=c1riT--B2O-KySgYWsZO1Q",
+    "source": "Site carrière EY",
+    "type": "pour_plus_tard",
+    "validated": false,
+    "seen_at": "2026-09-16T15:35:13.413595+00:00"
+  },
+  "873ed589a9c2b3e0": {
+    "title": "Internship Mergers & Acquisitions, Capital & Debt Advisory - Amsterdam",
+    "company": "EY",
+    "location": "",
+    "url": "https://eyglobal.yello.co/jobs/GJlIhPAjWPqlY23x0IiPbQ?job_board_id=c1riT--B2O-KySgYWsZO1Q",
+    "source": "Site carrière EY",
+    "type": "pour_plus_tard",
+    "validated": false,
+    "seen_at": "2026-09-16T15:35:17.433339+00:00"
   }
 }
